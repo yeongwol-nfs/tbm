@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,-scalable=no">
+<title>산림재난대응 · 현장 안전 TBM 일지</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; }
+  body { font-family: "Malgun Gothic","Apple SD Gothic Neo",sans-serif; background: #eef1ec; color: #222; overflow: hidden; }
+  #app { display: flex; flex-direction: column; width: 100%; height: 100%; max-width: 430px; margin: 0 auto; position: relative; }
+  
+  /* 상단 배너 */
+  .top-banner { background: #0e3322; color: #fff; padding: 10px 12px 4px; position: relative; }
+  .banner-text { font-size: 13px; letter-spacing: 0.5px; }
+  .banner-title { font-size: 17px; font-weight: 700; margin-top: 2px; }
+  .banner-title span { color: #f59f00; }
+  .banner-grad { height: 4px; background: linear-gradient(90deg,#f59f00,#d9480f,#a61e1e); margin-top: 3px; border-radius: 2px; }
+  
+  /* 탭 */
+  .tabs { display: flex; background: #fff; border-bottom: 1px solid #d5d9d2; }
+  .tab { flex: 1; padding: 10px 0; text-align: center; font-size: 14px; font-weight: 600; color: #8a8f86; cursor: pointer; position: relative; transition: color 0.2s; }
+  .tab.active { color: #17482f; }
+  .tab.active::after { content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(- restful50%); width: 32px; height: 3px; background: #f59f00; border-radius: 2px; }
+  
+  /* 메인 */
+  #main { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 70px; }
+  .page { display: none; padding: 12px; }
+  .page.active { display: block; }
+  
+  /* 카드 */
+  .card { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 12px; overflow: hidden; }
+  .card-header { background: #17482f; color: #fff; padding: 8px 12px; font-size: 13px; font-weight: 700; }
+  .card-body { padding: 12px; }
+  .card-title { font-size: 13px; color: #17482f; font-weight: 700; margin-bottom: 8px; }
+  
+  /* Inputs */
+  .row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .row > label { width: 90px; font-size: 13px; font-weight: 600; color: #333; flex-shrink: 0; }
+  .row > label::after { content: " 필수"; color: #d9480f; }
+  .row > label .opt { color: #999; font-weight: 400; margin-left: 4px; }
+  .row > label .sub { display: block; font-size: 10px; color: #aaa; font-weight: 400; margin-top: 2px; }
+  input[type="text"], input[type="date"], input[type="time"], input[type="number"], select, textarea { flex: 1; padding: 8px; border: 1px solid #c8ccd4; border-radius: 4px; font-size: 13px; background: #fafbfa; }
+  textarea { min-height: 60px; resize: vertical; }
+  .date-time-group { display: flex; gap: 8px; }
+  .date-time-group input { flex: 1; }
+  
+  /* 칩 */
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+  .chip { padding: 5px 10px; border-radius: 16px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid #c8ccd4; background: #fff; color: #555; white-space: nowrap; }
+  .chip:hover { border-color: #0e3322; }
+  .chip.selected { background: #0e3322; color: #fff; border-color: #0e3322; }
+  .chip-group-label { font-size: 12px; font-weight: 700; color: #17482f; margin: 10px 0 4px; padding-left: 2px; }
+  
+  /* 위험요인 */
+  .risk-section { margin-bottom: 8px; }
+  .risk-header { display: flex; align-items: center; gap: 6px; margin: 10px 0 6px; }
+  .risk-header-btn { background: none; border: 1px solid #c8ccd4; border-radius: 4px; padding: 2px 6px; font-size: 11px; color: #555; cursor: pointer; }
+  .risk-header-btn:hover { background: #f0f2ef; }
+  .risk-item { display: flex; align-items: flex-start; gap: 6px; padding: 6px 8px; background: #f7f9f6; border-radius: 4px; margin-bottom: 4px; }
+  .risk-item input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; }
+  .risk-item label { font-size: 12.5px; cursor: pointer; flex: 1; line-height: 1.4; }
+  .risk-detail { display: none; padding: 6px 8px 6px 28px; background: #fff; border-radius: 0 0 4px 4px; margin: -2px 0 6px; font-size: 12px; color: #666; }
+  .risk-detail.open { display: block; }
+  
+  /* 서명 */
+  .sig-canvas-wrap { position: relative; background: #fff; border: 2px dashed #bbb; border-radius: 6px; }
+  .sig-canvas { display: block; width: 100%; max-height: 200px; touch-action: none; }
+  .sig-tools { display: flex; gap: 6px; padding: 8px; justify-content: center; }
+  .sig-tools button { font-size: 11px; padding: 4px 10px; border: 1px solid #c8ccd4; background: #fff; border-radius: 4px; cursor: pointer; }
+  .sig-tools button.primary { background: #d9480f; color: #fff; border-color: #d9480f; }
+  
+  /* 결재 상태 바 */
+  .approval-bar { display: flex; background: #f0f2ef; padding: 8px 12px; gap: 8px; align-items: center; }
+  .step { flex: 1; text-align: center; font-size: 11px; padding: 4px; border-radius: 4px; background: #e0e4dd; color: #8a8f86; font-weight: 600; }
+  .step.active { background: #0e3322; color: #fff; }
+  .step.done { background: #f59f00; color: #fff; }
+  .step-label { font-size: 9px; display: block; margin-top: 1px; }
+  
+  /* 버튼 */
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .btn { flex: 1; min-width: 100px; padding: 9px; border: none; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; text-align: center; transition: background 0.2s; }
+  .btn-main { background: #d9480f; color: #fff; }
+  .btn-sec { background: #fff; color: #0e3322; border: 1px solid #0e3322; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  /* 하단 고정 바 */
+  .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; max-width: 430px; margin: 0 auto; background: #fff; border-top: 1px solid #d5d9d2; padding: 6px 12px; padding-bottom: calc(6px + env(safe-area-inset-bottom)); display: flex; gap: 8px; z-index: 10; }
+  .bottom-bar .btn { flex: 1; padding: 8px; font-size: 13px; }
+  
+  /* 사진 */
+  .photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .photo-item { position: relative; aspect-ratio: 1; background: #eee; border-radius: 6px; overflow: hidden; }
+  .photo-item img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-item .del { position: absolute; top: 2px; right: 2px; background: rgba(200,0,0,0.7); color: #fff; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+  .photo-item .desc { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: #fff; font-size: 9px; padding: 2px; text-align: center; }
+  .photo-item.full { grid-column: 1 / -1; }
+  
+  /* 기록 목록 */
+  .record-card { background: #fff; border-radius: 8px; padding: 10px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .record-date { font-weight: 700; color: #17482f; font-size: 13px; }
+  .record-badge { font-size: 10px; padding: 2px 7px; border-radius: 12px; font-weight: 600; }
+  .badge-pending { background: #fff3cd; color: #b58900; }
+  .badge-approved { background: #d4edda; color: #1e7e34; }
+  .badge-rejected { background: #f8d7da; color: #b02a37; }
+  .record-status { font-size: 11px; color: #888; margin-bottom: 6px; }
+  .record-work { font-size: 12px; margin-bottom: 4px; }
+  .record-meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 11px; color: #666; }
+  .record-meta span { background: #f0f2ef; padding: 1px 6px; border-radius: 10px; }
+  .record-actions { display: flex; gap: 4px; margin-top: 8px; }
+  .record-actions button { font-size: 10px; padding: 3px 7px; border: 1px solid #c8ccd4; background: #fff; border-radius: 3px; }
+  
+  /* 필터 */
+  .filter-row { display: flex; gap: 6px; margin-bottom: 12px; }
+  .filter-btn { flex: 1; padding: 6px; font-size: 12px; border: 1px solid #c8ccd4; background: #fff; border-radius: 4px; cursor: pointer; font-weight: 600; }
+  .filter-btn.active { background: #0e3322; color: #fff; border-color: #0e3322; }
+  
+  /* 인쇄 관련 */
+  @media print {
+    body { background: #fff; }
+    #app { max-width: none; }
+    .top-banner, .tabs, .bottom-bar, .btn, .sig-tools { display: none !important; }
+    #main { overflow: visible; padding: 10mm; }
+    .page { display: block !important; }
+    .print-title { text-align: center; font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .print-title small { font-size: 10px; color: #d9480f; }
+    table { width: 100%; border-collapse: collapse; font-size: 9.5px; }
+    th, td { border: 1px solid #000; padding: 4px; text-align: left; vertical-align: top; }
+    th { background: #eef1ec; font-weight: 700; }
+    .print-approval { text-align: right; margin-bottom: 8px; }
+    .print-approval .step-box { display: inline-block; border: 1px solid #000; padding: 2px 6px; margin-left: 4px; font-size: 9px; }
+    .print-photo { page-break-before: always; }
+    .print-photo h3 { font-size: 12px; margin-bottom: 4px; }
+    .print-photo img { width: 100%; border: 1px solid #ccc; }
+  }
+  
+  /* 숨김 유틸리티 */
+  .hidden { display: none !important; }
+  .error-msg { color: #d9480f; font-size: 11px; margin-top: 4px; min-height: 14px; }
+  
+  /* 결재 모달 */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .modal-overlay.active { display: flex; }
+  .modal { background: #fff; border-radius: 10px; width: 100%; max-width: 400px; max-height: 90vh; overflow: hidden; }
+  .modal-header { background: #17482f; color: #fff; padding: 12px; font-weight: 700; }
+  .modal-body { padding: 16px; }
+  .modal-footer { padding: 12px; border-top: 1px solid #ddd; display: flex; gap: 8px; }
+  .modal-footer .btn { flex: 1; }
+  .pin-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; text-align: center; letter-spacing: 4px; }
+  
+  /* Toast */
+  .toast { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0,0,0,0.8); color: #fff; padding: 10px 16px; border-radius: 20px; font-size: 13px; opacity: 0; transition: opacity 0.3s, transform 0.3s; z-index: 200; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  
+  /* 결재 대기 표시 */
+  .confirm-needed { background: #fff3cd; border: 1px solid #f0c36d; padding: 4px 8px; font-size: 10px; border-radius: 3px; color: #856404; font-weight: 600; }
+  
+  /*raw input hidden */
+  input[type="file"] { display: none; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- 상단 배너 -->
+  <header class="top-banner">
+    <div class="banner-text">산림재난대응 · 현장 안전</div>
+    <div class="banner-title">작업 전 안전점검회의 <span>TBM</span> 일지</div>
+    <div class="banner-grad"></div>
+  </header>
+
+  <!-- 탭 -->
+  <nav class="tabs">
+    <div class="tab active" data-tab="write">작성</div>
+    <div class="tab" data-tab="record">기록</div>
+  </nav>
+
+  <!-- 메인 콘텐츠 -->
+  <main id="main">
+    <!-- 작성 페이지 -->
+    <section id="page-write" class="page active">
+      <!-- 결재 상태 바 -->
+      <div class="approval-bar" id="approvalBar">
+        <div class="step" data-step="0"><span>작성 중</span><span class="step-label">저장</span></div>
+        <div class="step" data-step="1"><span>검토 대기</span><span class="step-label">대기</span></div>
+        <div class="step" data-step="2"><span>승인 대기</span><span class="step-label">대기</span></div>
+        <div class="step" data-step="3"><span>확정</span><span class="step-label">완료</span></div>
+        <div class="step" data-step="4"><span>반려</span><span class="step-label">반려</span></div>
+      </div>
+
+      <!-- 기본 정보 카드 -->
+      <div class="card">
+        <div class="card-header">① 기본 정보</div>
+        <div class="card-body">
+          <div class="row">
+            <label>작업 일자<input type="date" id="workDate"></label>
+            <label>사업명<input type="text" id="projectName" value="산림재난대응단"></label>
+          </div>
+          <div class="row date-time-group">
+            <label>시작 시각<input type="time" id="startTime"></label>
+            <span style="display:flex;align-items:center;color:#666;font-size:12px;">→</span>
+            <label>종료 시각<input type="time" id="endTime"></label>
+            <label>소요(분)<input type="number" id="duration" min="0" value="0" readonly style="background:#f0f2ef;font-weight:600;"></label>
+          </div>
+          <div class="row">
+            <label>기상 상태</label>
+            <div class="chip-row" id="weatherChips">
+              <button class="chip selected" data-val="맑음">맑음</button>
+              <button class="chip" data-val="흐림">흐림</button>
+              <button class="chip" data-val="비">비</button>
+              <button class="chip" data-val="눈">눈</button>
+              <button class="chip" data-val="강풍">강풍</button>
+              <button class="chip" data-val="폭염">폭염</button>
+              <button class="chip" data-val="한파">한파</button>
+            </div>
+          </div>
+          <div class="row">
+            <label>기상 메모<span class="opt">/선택</span><span class="sub">예: 강풍주의보, 기온 -3°C</span></label>
+            <input type="text" id="weatherMemo" placeholder="예: 강풍주의보, 기온 -3°C">
+          </div>
+        </div>
+      </div>
+
+      <!-- 구분 및 작업 내용 -->
+      <div class="card">
+        <div class="card-header">② 작업 정보</div>
+        <div class="card-body">
+          <div class="chip-group-label">공종 구분 (작업 유형 선택)</div>
+          <div class="chip-row" id="typeChips">
+            <button class="chip selected" data-val="임도">임도</button>
+            <button class="chip" data-val="사방">사방</button>
+            <button class="chip" data-val="벌목">벌목</button>
+            <button class="chip" data-val="조림">조림</button>
+            <button class="chip" data-val="숲가꾸기">숲가꾸기</button>
+            <button class="chip" data-val="풀베기">풀베기</button>
+            <button class="chip" data-val="병해충 방제">병해충 방제</button>
+            <button class="chip" data-val="산림재난대응">산림재난대응</button>
+          </div>
+          <div class="chip-group-label">직접 입력 (기타 공종)</div>
+          <div class="row">
+            <label style="width:auto;flex:1;">공종명<input type="text" id="customType" placeholder="직접 입력"></label>
+          </div>
+          <div class="row">
+            <label>오늘 작업 내용</label>
+            <textarea id="workContent" placeholder="오늘 수행할 작업 내용을 구체적으로 작성하세요."></textarea>
+          </div>
+          <div class="row">
+            <label>오늘 위험 요인</label>
+            <textarea id="riskFactors" placeholder="예상되는 위험 요인을 작성하세요."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 위험요인 체크 -->
+      <div class="card">
+        <div class="card-header">③ 위험요인 점검 (체크박스)</div>
+        <div class="card-body" id="riskContainer">
+          <!-- JS로 렌더링 -->
+        </div>
+      </div>
+
+      <!-- 근로자 의견 및 확인사항 -->
+      <div class="card">
+        <div class="card-header">④ 근로자 의견 및 확인사항</div>
+        <div class="card-body">
+          <div class="row">
+            <label>근로자 의견 (아차사고 포함)</label>
+            <textarea id="workerOpinion" placeholder="근로자 의견, 아차사고 사례, 개선 제안 등을 작성하세요."></textarea>
+          </div>
+          <div style="margin-top:8px;font-size:12px;font-weight:700;color:#17482f;">확인사항 (체크 필수)</div>
+          <div class="risk-item" style="margin-bottom:4px;">
+            <input type="checkbox" id="chkStopRight" checked>
+            <label for="chkStopRight">작업중지권 고지 여부</label>
+          </div>
+          <div class="row" style="width:calc(100% - 90px);margin-left:90px;">
+            <label style="width:auto;font-weight:600;font-size:12px;">외국인 근로자 고용</label>
+            <select id="foreignWorker" style="flex:1;">
+              <option value="없음">없음</option>
+              <option value="있음">있음 (아래 인원 수 입력)</option>
+            </select>
+            <input type="number" id="foreignCount" placeholder="인원" min="0" style="width:60px;text-align:center;display:none;">
+          </div>
+          <div class="risk-item" style="margin-bottom:4px;">
+            <input type="checkbox" id="chkHealth" checked>
+            <label for="chkHealth">건강상태 확인</label>
+          </div>
+          <div class="risk-item" style="margin-bottom:4px;">
+            <input type="checkbox" id="chkPPE" checked>
+            <label for="chkPPE">보호구 착용 확인</label>
+          </div>
+          <div class="risk-item" style="margin-bottom:4px;">
+            <input type="checkbox" id="chkRiskShare" checked>
+            <label for="chkRiskShare">위험성평가 근로자 공유</label>
+          </div>
+          <div class="risk-item" style="margin-bottom:4px;">
+            <input type="checkbox" id="chkHeatCold" checked>
+            <label for="chkHeatCold">온열·한랭질환 예방·대응수칙 교육</label>
+          </div>
+          <div class="row">
+            <label>특이사항</label>
+            <input type="text" id="specialNotes" placeholder="특이사항 없음 시 '없음' 입력">
+          </div>
+        </div>
+      </div>
+
+      <!-- 참석자 서명 -->
+      <div class="card">
+        <div class="card-header">⑤ 참석자 서명 (서명 필수)</div>
+        <div class="card-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="font-size:12px;font-weight:700;color:#17482f;">참석자 명단 (서명란)</div>
+            <button type="button" style="font-size:11px;padding:3px 8px;background:#fff;border:1px solid #c8ccd4;border-radius:3px;" id="addSignerBtn">+ 추가</button>
+          </div>
+          <div id="signerList">
+            <!-- JS로 렌더링 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 상시 위험성평가 -->
+      <div class="card">
+        <div class="card-header">⑥ 상시 위험성평가</div>
+        <div class="card-body">
+          <div id="assessmentList">
+            <!-- JS로 렌더링 -->
+          </div>
+          <button type="button" class="btn" style="width:100%;background:#fff;color:#0e3322;border:1px solid #0e3322;margin-top:8px;" id="addAssessmentBtn">+ 위험요인 추가</button>
+        </div>
+      </div>
+
+      <!-- 사진 첨부 -->
+      <div class="card">
+        <div class="card-header">⑦ 현장 사진 (최대 10장)</div>
+        <div class="card-body">
+          <div id="photoGrid" class="photo-grid">
+            <!-- JS로 렌더링 -->
+          </div>
+          <input type="file" id="photoInput" accept="image/*" multiple>
+          <label for="photoInput" style="display:block;text-align:center;padding:10px;background:#f7f9f6;border:1px dashed #bbb;border-radius:6px;font-size:12px;color:#666;cursor:pointer;margin-top:8px;">
+            사진 추가 (최대 10장) + 선택시 자동 압축
+          </label>
+        </div>
+      </div>
+
+      <!-- 결재 -->
+      <div class="card">
+        <div class="card-header">⑧ 결재 (작성 → 검토 → 승인)</div>
+        <div class="card-body" id="approvalSection">
+          <div class="row">
+            <label style="width:auto;">결재 상태</label>
+            <span id="approvalStatusText" style="flex:1;font-size:12px;font-weight:600;color:#0e3322;">작성 중</span>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-sec" id="saveDraftBtn">임시저장</button>
+            <button class="btn btn-main" id="requestApprovalBtn">저장하고 결재 요청</button>
+          </div>
+          <div id="approvalMissingInfo" class="error-msg" style="margin-top:8px;"></div>
+          <div id="approvalInfo" style="font-size:11px;color:#666;margin-top:8px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 기록 페이지 -->
+    <section id="page-record" class="page">
+      <div class="filter-row">
+        <button class="filter-btn active" data-filter="all">전체</button>
+        <button class="filter-btn" data-filter="pending">결재 대기</button>
+        <button class="filter-btn" data-filter="rejected">반려</button>
+      </div>
+      <div id="recordList">
+        <!-- JS로 렌더링 -->
+      </div>
+      <div style="text-align:center;padding:20px;color:#888;font-size:12px;" id="emptyMessage">작성된 일지가 없습니다.</div>
+    </section>
+  </main>
+
+  <!-- 하단 고정 바 -->
+  <footer class="bottom-bar">
+    <button class="btn btn-sec" id="newEntryBtn">새 일지</button>
+    <button class="btn btn-sec" id="printBtn">인쇄·PDF</button>
+    <button class="btn btn-sec" id="exportBtn">백업·내보내기</button>
+  </footer>
+</div>
+
+<!--PIN 인증 모달-->
+<div class="modal-overlay" id="pinModal">
+  <div class="modal">
+    <div class="modal-header">결재자 인증</div>
+    <div class="modal-body">
+      <p style="font-size:13px;margin-bottom:12px;">결재 진행을 위해 관리자 인증을 요청하세요.</p>
+      <input type="password" class="pin-input" id="pinInput" placeholder="PIN 입력" maxlength="6" autocomplete="off" inputmode="numeric">
+      <p style="font-size:11px;color:#888;margin-top:8px;text-align:center;">(PIN 설정 필요 — 최초 사용 시 등록)</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" style="background:#fff;color:#333;border:1px solid #999;" id="cancelPinBtn">취소</button>
+      <button class="btn" style="background:#d9480f;color:#fff;" id="confirmPinBtn">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 서명 모달 -->
+<div class="modal-overlay" id="sigModal">
+  <div class="modal" style="max-width:340px;">
+    <div class="modal-header">서명 입력</div>
+    <div class="modal-body" style="padding:0;">
+      <canvas id="signCanvas" class="sig-canvas"></canvas>
+      <div class="sig-tools">
+        <button type="button" id="clearSigBtn">지우기</button>
+        <button type="button" id="cancelSigBtn">취소</button>
+        <button type="button" class="primary" id="confirmSigBtn">확인</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 결재 대기 확인 -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <div class="modal-header">확인</div>
+    <div class="modal-body" style="font-size:13px;padding:18px;">
+      <p id="confirmMessage">정말 진행하시겠습니까?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" style="background:#fff;color:#333;border:1px solid #999;" id="confirmCancelBtn">취소</button>
+      <button class="btn" style="background:#d9480f;color:#fff;" id="confirmOkBtn">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast">메시지</div>
+</body>
+</html>
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.onclick = () => document.body.removeChild(overlay);
+    const imgEl = document.createElement('img');
+    imgEl.src = currentDraft.photos[index].dataURL;
+    imgEl.style.maxWidth = '95vw';
+    imgEl.style.maxHeight = '85vh';
+    imgEl.style.borderRadius = '8px';
+    overlay.appendChild(imgEl);
+    document.body.appendChild(overlay);
+  }
+
+  // ── 사진 추가 핸들러 (압축 후 저장) ─────────────────────────────────────────
+  async function handlePhotoSelect(files) {
+    let added = 0;
+    const remain = MAX_PHOTOS - currentDraft.photos.length;
+    for (const file of Array.from(files || [])) {
+      if (added >= remain) { showToast(`사진은 최대 ${MAX_PHOTOS}장까지 가능합니다.`); break; }
+      if (!file.type.startsWith('image/')) continue;
+      try {
+        const dataURL = await new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = () => res(r.result);
+          r.onerror = rej;
+          r.readAsDataURL(file);
+        });
+        const compressed = await compressImage(dataURL, MAX_IMG_DIM, IMG_QUALITY);
+        currentDraft.photos.push({ id: Date.now() + Math.random(), dataURL: compressed, desc: '' });
+        added++;
+      } catch (e) {
+        console.error('압축 실패:', e);
+      }
+    }
+    renderPhotos();
+    showToast(`사진 ${added}장 추가됨 (총 ${currentDraft.photos.length}/${MAX_PHOTOS})`);
+  }
+
+  // ── 위험성평가 배열 ──────────────────────────────────────────────────────────
+  let assessments = [];
+
+  // ── 결재 대기 / 확인 모달 컨트롤 ─────────────────────────────────────────────
+  let confirmResolver = null;
+  function showConfirm(message) {
+    return new Promise(resolve => {
+      $('#confirmMessage').textContent = message;
+      $('#confirmModal').classList.add('active');
+      confirmResolver = resolve;
+    });
+  }
+  $('#confirmCancelBtn').onclick = () => {
+    $('#confirmModal').classList.remove('active');
+    if (confirmResolver) { confirmResolver(false); confirmResolver = null; }
+  };
+  $('#confirmOkBtn').onclick = () => {
+    $('#confirmModal').classList.remove('active');
+    if (confirmResolver) { confirmResolver(true); confirmResolver = null; }
+  };
+
+  // ── PIN 모달 컨트롤 ──────────────────────────────────────────────────────────
+  function showPinModal() {
+    $('#pinInput').value = '';
+    $('#pinModal').classList.add('active');
+    setTimeout(() => $('#pinInput').focus(), 50);
+  }
+  function hidePinModal() {
+    $('#pinModal').classList.remove('active');
+  }
+  $('#cancelPinBtn').onclick = hidePinModal;
+  $('#confirmPinBtn').onclick = async () => {
+    const val = $('#pinInput').value;
+    if (!val) { showToast('PIN을 입력하세요.'); return; }
+    // 최초 설정인지 확인 (storage에 pin hash가 없으면 최초 설정)
+    const stored = await lsLoad('pin_hash');
+    if (!stored) {
+      // 최초 설정
+      const hash = await sha256(val);
+      lsSave('pin_hash', hash);
+      lsSave('pin_set', true);
+      hidePinModal();
+      showToast('PIN이 등록되었습니다.');
+      return;
+    }
+    // 검증
+    const hash = await sha256(val);
+    if (hash === stored) {
+      hidePinModal();
+      return true;
+    } else {
+      showToast('PIN이 일치하지 않습니다.');
+      return false;
+    }
+  };
+
+  // ── Toast 자동 숨김 ──────────────────────────────────────────────────────────
+  $('#toast').addEventListener('transitionend', function() {
+    this.classList.remove('show');
+  });
+
+  // ── 버튼 상태 업데이트 ───────────────────────────────────────────────────────
+  function updateButtonStates() {
+    // 하단 바 버튼은 항상 활성
+  }
+
+  // ── 새로 작성 ────────────────────────────────────────────────────────────────
+  async function newEntry() {
+    const mustSave = currentDraft && (
+      currentDraft.workContent?.trim() ||
+      currentDraft.signers?.some(s => s.signed) ||
+      currentDraft.photos?.length > 0
+    );
+    if (mustSave) {
+      const proceed = await showConfirm('현재 작성 중인 내용이 있습니다. 새로 만들면 저장되지 않은 내용이 삭제됩니다. 계속하시겠습니까?');
+      if (!proceed) return;
+    }
+    currentDraft = createEmptyDraft();
+    currentSigners = [];
+    currentApprovalHash = '';
+    nextSignerId = 1;
+    nextAssessmentId = 1;
+    assessments = [];
+    currentDraft.photos = [];
+    await saveDraft(currentDraft);
+    renderSigners();
+    renderAssessments();
+    renderPhotos();
+    renderRisks();
+    updateApprovalUI();
+    showToast('새 일지를 시작합니다.');
+  }
+
+  // ── 인쇄 (A4) ────────────────────────────────────────────────────────────────
+  function doPrint() {
+    // 미확정이면 제목에 표시
+    const isConfirmed = currentDraft?.approval?.state === APPROVAL_STATES.CONFIRMED;
+    const titleSuffix = isConfirmed ? '' : ' (미확정)';
+
+    const printWindow = window.open('', '_blank', 'width=800,height=1000');
+    const imgList = currentDraft?.photos || [];
+    const signerList = currentDraft?.signers || [];
+
+    printWindow.document.write(`
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>TBM 일지 인쇄 — ${currentDraft?.workDate || '날짜미지정'}</title>
+<style>
+  @page { size: A4; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body { font-family: "Malgun Gothic","Apple SD Gothic Neo",sans-serif; font-size: 9pt; color: #000; background: #fff; }
+  h1 { text-align: center; font-size: 15pt; margin: 0 0 2mm; }
+  h1 small { font-size: 8pt; color: #d9480f; }
+  .subtitle { text-align: center; font-size: 8pt; color: #666; margin-bottom: 4mm; }
+  table { width: 100%; border-collapse: collapse; font-size: 8pt; }
+  th, td { border: 1px solid #000; padding: 3px; text-align: left; vertical-align: top; }
+  th { background: #eef1ec; font-weight: 700; }
+  .approval-box { text-align: right; margin-bottom: 4mm; border: 1px solid #000; padding: 3px; }
+  .approval-box span { display: inline-block; border: 1px solid #000; padding: 2px 6px; margin-left: 3px; font-size: 7pt; }
+  .meta-row { display: flex; justify-content: space-between; margin-bottom: 3mm; font-size: 8pt; }
+  .sign-table td { height: 22mm; }
+  .sign-cell { height: 8mm; }
+  .photo-page { page-break-before: always; }
+  .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }
+  .photo-cell { border: 1px solid #ccc; }
+  .photo-cell img { width: 100%; height: 45mm; object-fit: cover; }
+  .photo-cap { font-size: 7pt; padding: 2px; background: #f0f0f0; }
+  .footer-note { margin-top: 6mm; font-size: 7pt; color: #666; border-top: 1px solid #ccc; padding-top: 2mm; }
+  .risk-table td { padding: 2px; }
+  .risk-check { text-align: center; }
+  .assessment-table td { font-size: 7.5pt; }
+</style>
+</head>
+<body>
+  <div class="approval-box">
+    <strong>결재란</strong>
+    ${currentDraft?.approval?.approval yellow?.length ? 
+      currentDraft.approval.approval.map(a => `<span>${a.role}: ${a.name || '?'} ${a.signed ? '✓' : '✗'}</span>`).join('') : 
+      '<span>작성: _______</span><span>검토: _______</span><span>승인: _______</span>'}
+  </div>
+  <h1>산림재난대응 · 현장 안전<small>TBM</small></h1>
+  <div class="subtitle">작업 전 안전점검회의 일지${titleSuffix}</div>
+  <div class="meta-row">
+    <span><strong>일시:</strong> ${currentDraft?.workDate} ${currentDraft?.startTime || ''} ~ ${currentDraft?.endTime || ''} (${currentDraft?.duration || 0}분)</span>
+    <span><strong>기상:</strong> ${(currentDraft?.weatherChips || []).join(', ') || '—'} ${currentDraft?.weatherMemo ? '| ' + currentDraft.weatherMemo : ''}</span>
+  </div>
+  <div class="meta-row">
+    <span><strong>사업명:</strong> ${currentDraft?.projectName || '—'}</span>
+    <span><strong>구분:</strong> ${currentDraft?.workType || currentDraft?.customType || '—'}</span>
+  </div>
+  <div><strong>참석 인원:</strong> ${signerList.filter(s => s.name).length}명 / 서명 ${signerList.filter(s => s.signed).length}명</div>
+
+  <table style="margin-top:3mm;">
+    <tr><th style="width:18%">작업 내용</th><td colspan="3">${(currentDraft?.workContent || '—').replace(/\n/g, '<br>')}</td></tr>
+    <tr><th>위험 요인</th><td colspan="3">${(currentDraft?.riskFactors || '—').replace(/\n/g, '<br>')}</td></tr>
+  </table>
+
+  <h3 style="font-size:9pt;margin:3mm 0 1mm;">위험요인 점검표</h3>
+  <table class="risk-table">
+    <tr><th style="width:50%">공통 위험요인</th><th colspan="3">공종별 위험요인</th></tr>
+    <tr>
+      <td>
+        <label><input type="checkbox" ${currentDraft?.risks?.common?.includes('경사지 작업 중 미끄러짐·실족·추락') ? 'checked' : ''} disabled> 경사지 미끄러짐·실족·추락</label><br>
+        <label><input type="checkbox" ${currentDraft?.risks?.common?.includes('분진') ? 'checked' : ''} disabled> 분진(호흡기 질환)</label><br>
+        <label><input type="checkbox" ${currentDraft?.risks?.common?.includes('진동·소음') ? 'checked' : ''} disabled> 진동·소음 건강장해</label><br>
+        <label><input type="checkbox" ${currentDraft?.risks?.common?.includes('화학물질') ? 'checked' : ''} disabled> 화학물질 중독·화상</label><br>
+        <label><input type="checkbox" ${currentDraft?.risks?.common?.includes('장비 충돌·협착') ? 'checked' : ''} disabled> 장비 충돌·협착</label><br>
+        <label><input type="checkbox" ${currentDraft?.risks?.common?.includes('기상 악화') ? 'checked' : ''} disabled> 기상 악화(강풍·폭염 등)</label><br>
+        <label><input type="checkbox" ${currentDraft?.risks?.common?.includes('야생동물') ? 'checked' : ''} disabled> 야생동물 피해</label>
+      </td>
+      <td colspan="3" style="font-size:7.5pt;">
+        <strong>${currentDraft?.workType || currentDraft?.customType || '공통'}</strong>: ${(currentDraft?.risks?.specific || []).join(', ') || '—'}<br>
+        <strong>직접입력:</strong> ${(currentDraft?.risks?.custom || []).join(', ') || '—'}
+      </td>
+    </tr>
+  </table>
+
+  <h3 style="font-size:9pt;margin:3mm 0 1mm;">근로자 의견 및 확인사항</h3>
+  <table>
+    <tr><td style="width:20%"><strong>의견</strong></td><td>${(currentDraft?.workerOpinion || '—').replace(/\n/g, '<br>')}</td></tr>
+    <tr><td><strong>확인사항</strong></td>
+        <td>
+          작업중지권 고지: ${currentDraft?.checkStopRight ? '✓' : '✗'} &nbsp;|&nbsp; 건강상태 확인: ${currentDraft?.checkHealth ? '✓' : '✗'} &nbsp;|&nbsp; 보호구 착용: ${currentDraft?.checkPPE ? '✓' : '✗'}<br>
+          위험성평가 공유: ${currentDraft?.checkRiskShare ? '✓' : '✗'} &nbsp;|&nbsp; 온열·한랭 교육: ${currentDraft?.checkHeatCold ? '✓' : '✗'} &nbsp;|&nbsp; 외국인: ${currentDraft?.foreignWorker}
+          ${currentDraft?.foreignCount ? '(' + currentDraft.foreignCount + '명)' : ''}
+          <br><strong>특이사항:</strong> ${currentDraft?.specialNotes || '없음'}
+        </td>
+    </tr>
+  </table>
+
+  <h3 style="font-size:9pt;margin:3mm 0 1mm;">상시 위험성평가</h3>
+  <table class="assessment-table">
+    <tr><th style="width:8%">#</th><th style="width:22%">위험요인</th><th style="width:8%">수준</th><th style="width:30%">개선대책</th><th style="width:12%">완료일</th><th style="width:20%">담당자</th></tr>
+    ${(currentDraft?.assessments || []).map((a, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td>${a.hazard || '—'}</td>
+      <td class="risk-check" style="color:${a.level === '상' ? '#c0392b' : a.level === '중' ? '#e67e22' : '#27ae60'};font-weight:700">${a.level || '—'}</td>
+      <td>${a.measure || '—'}</td>
+      <td>${a.date || '—'}</td>
+      <td>${a.manager || '—'}</td>
+    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:#999">등록된 평가 없음</td></tr>'}
+  </table>
+
+  <h3 style="font-size:9pt;margin:3mm 0 1mm;">참석자 서명</h3>
+  <table class="sign-table">
+    <tr><th style="width:25%">이름</th><th style="width:37%">서명</th><th style="width:38%">서명</th></tr>
+    ${Array.from({length: 4}).map((_, i) => {
+      const s = signerList[i] || {};
+      const sigImg = s.signatureDataURL ? `<img src="${s.signatureDataURL}" style="max-width:100%;max-height:12mm;border:1px solid #ccc;">` : '<span style="color:#999">(서명 누락)</span>';
+      return `<tr><td>${s.name || ''}</td><td>${sigImg}</td><td></td></tr>`;
+    }).join('')}
+    <tr><td colspan="3" style="font-size:7pt;color:#888">* 서명: 서명이 있는 경우에만 표시됩니다.</td></tr>
+  </table>
+
+  ${imgList.length > 0 ? `
+  <div class="photo-page">
+    <h3 style="font-size:9pt;margin-bottom:2mm;">현장 사진 (${imgList.length}장)</h3>
+    <div class="photo-grid">
+      ${imgList.map((p, i) => `
+        <div class="photo-cell">
+          <img src="${p.dataURL}" alt="현장사진 ${i+1}">
+          <div class="photo-cap">${p.desc || '사진 ' + (i+1)}</div>
+        </div>`).join('')}
+    </div>
+  </div>` : ''}
+
+  <div class="footer-note">
+    본 문서는 현장 안전 점검 기록을 위한 양식입니다.<br>
+    ${isConfirmed ? '결재가 완료된 확정 문서입니다.' : '결재가 완료되지 않은 미확정 문서입니다.'}
+  </div>
+</body>
+</html>
+    `);
+    printWindow.document.close();
+    printWindow.onload = function() {
+      printWindow.print();
+    };
+  }
+
+  // ── 백업 / 내보내기 (JSON) ──────────────────────────────────────────────────
+  async function exportAll() {
+    const allLogs = await dbGetAll(STORE_LOGS);
+    const approvals = await dbGetAll(STORE_LOG_APPROVALS);
+    const imgApprovals = await dbGetAll(STORE_IMG_APPROVALS);
+    const packageData = {
+      version: '1.0',
+      exportedAt: new Date().toISOString(),
+      logs: allLogs.map(l => ({ ...l, photos: [] })), // dataURL은 용량이 크므로 제외 안내
+      approvals,
+      imgApprovals,
+      note: '사진 dataURL은 제외되었습니다. 원본 일지에서 확인하세요.'
+    };
+    const blob = new Blob([JSON.stringify(packageData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tbm_backup_${fmtDate(new Date())}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('백업 파일을 생성했습니다.');
+  }
+
+  // ── 백업 가져오기 (사진 포함) ───────────────────────────────────────────────
+  function importFrom(file) {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data.logs || !Array.isArray(data.logs)) {
+          showToast('유효하지 않은 백업 파일입니다.');
+          return;
+        }
+        const results = [];
+        for (const item of data.logs) {
+          // photos가 있으면 복원
+          const restored = { ...item };
+          if (data.photos_map) {
+            restored.photos = (data.photos_map[item.id] || []).map(p => ({
+              id: p.id || Date.now() + Math.random(),
+              dataURL: p.dataURL,
+              desc: p.desc || ''
+            }));
+          }
+          await dbPut(STORE_LOGS, restored);
+          results.push(restored.id);
+        }
+        showToast(`${results.length}건의 일지를 복원했습니다.`);
+        loadDraft(null); // 목록 갱신
+      } catch (err) {
+        showToast('백업 파일 파싱 실패: ' + err.message);
+      }
+    };
+    reader.onerror = () => showToast('파일 읽기 실패');
+    reader.readAsText(file);
+  }
+  $('#exportBtn').onclick = exportAll;
+
+  // ── 이미지 입력 (받은 일지) ─────────────────────────────────────────────────
+  async function handleImageUpload(file, submitterName, note) {
+    if (!file || !file.type.startsWith('image/')) return;
+    try {
+      const dataURL = await new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+      // 가로 1400px로 압축
+      const compressed = await compressImage(dataURL, RECEIVED_IMG_MAX_W, 0.85);
+      const imgHash = await sha256(compressed);
+      const recordId = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+      const record = {
+        id: recordId,
+        type: 'received_image',
+        createdAt: new Date().toISOString(),
+        workDate: submitterName?.date || fmtDate(new Date()),
+        projectName: '이미지 접수',
+        workType: '기타',
+        workContent: note || '',
+        riskFactors: '',
+        photos: [{ id: recordId, dataURL: compressed, desc: submitterName?.submitter || '제출자: ' + (submitterName?.submitter || '미상') }],
+        signers: [],
+        approval: { state: APPROVAL_STATES.PENDING_REVIEW, approvals: [], hash: '', subId: '', rejectedBy: null, rejectReason: null, rejectTimestamp: null },
+        submitter: submitterName,
+        imgHash: imgHash
+      };
+      await dbPut(STORE_LOGS, record);
+      await dbPut(STORE_IMG_APPROVALS, { id: recordId, record, reviews: [] });
+      showToast('이미지 일지가 등록되었습니다. 검토 대기 상태입니다.');
+      // 기록 목록 갱신
+      renderRecordList();
+      // 이미지 일지로 이동 (write 모드로)
+      switchToWrite();
+      loadDraft(recordId);
+    } catch (err) {
+      showToast('이미지 처리 실패: ' + err.message);
+    }
+  }
+
+  // ── 이미지 일지 결재 (검토 → 승인) ───────────────────────────────────────────
+  async function reviewImageRecord(recordId) {
+    showPinModal();
+  }
+  async function approveImageRecord(recordId, action = 'approve') {
+    const ok = await showPinModalAndVerify();
+    if (!ok) { showToast('인증 실패'); return; }
+    const rec = await dbGet(STORE_LOGS, recordId);
+    if (!rec) { showToast('일지를 찾을 수 없습니다.'); return; }
+    if (rec.approval?.state !== APPROVAL_STATES.PENDING_REVIEW && rec.approval?.state !== APPROVAL_STATES.PENDING_APPROVE) {
+      showToast('이미 처리된 결재입니다.');
+      return;
+    }
+    const approvals = rec.approval?.approvals || [];
+    const exists = approvals.find(a => a.role === action);
+    if (exists) { showToast('이미 ' + (action === 'review' ? '검토' : '승인') + '되었습니다.'); return; }
+    const pinHash = await sha256($('#pinInput').value);
+    approvals.push({
+      role: action === 'review' ? '검토' : '승인',
+      name: '결재자',
+      timestamp: new Date().toISOString(),
+      pinHash: pinHash,
+      subId: rec.approval?.subId || '',
+      hash: rec.approval?.hash || ''
+    });
+    rec.approval.approvals = approvals;
+    if (action === 'approve') {
+      rec.approval.state = APPROVAL_STATES.CONFIRMED;
+      rec.approval.hash = await sha256(JSON.stringify({ id: recordId, approvals }));
+    }
+    rec.approval.subId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString() + Math.random().toString(36).slice(2);
+    await dbPut(STORE_LOGS, rec);
+    await dbPut(STORE_IMG_APPROVALS, { id: recordId, record: rec, reviews: approvals });
+    showToast(action === 'approve' ? '승인 완료' : '검토 완료');
+    renderRecordList();
+  }
+  async function showPinModalAndVerify() {
+    return new Promise(async (resolve) => {
+      $('#pinInput').value = '';
+      $('#pinModal').classList.add('active');
+      const done = () => {
+        $('#pinModal').classList.remove('active');
+        resolve(false);
+      };
+      $('#cancelPinBtn').onclick = done;
+      const verify = async () => {
+        const val = $('#pinInput').value;
+        const stored = await lsLoad('pin_hash');
+        if (!stored) { showToast('PIN이 설정되지 않았습니다.'); return; }
+        const hash = await sha256(val);
+        if (hash === stored) {
+          $('#pinModal').classList.remove('active');
+          resolve(true);
+        } else { showToast('PIN 불일치'); }
+      };
+      $('#confirmPinBtn').onclick = verify;
+    });
+  }
+
+  // ── 결재 요청 (작성자 → 검토 대기) ──────────────────────────────────────────
+  async function requestApproval() {
+    const missing = checkApprovalRequirements();
+    if (missing.length > 0) {
+      $('#approvalMissingInfo').innerHTML = '<strong>결재 요청 불가 — 다음 항목 누락:</strong><br>' + missing.map(m => '• ' + m).join('<br>');
+      showToast('누락된 항목을 확인하세요.');
+      return;
+    }
+
+    // 해시 계산
+    const hashData = {
+      id: currentDraft.id,
+      workDate: currentDraft.workDate,
+      workContent: currentDraft.workContent,
+      workType: currentDraft.workType,
+      signers: currentSigners.filter(s => s.signed).map(s => s.name),
+      version: currentDraft.version
+    };
+    const newHash = await sha256(JSON.stringify(hashData));
+
+    // 기존 해시와 다르면 확인 필요
+    if (currentApprovalHash && currentApprovalHash !== newHash) {
+      const proceed = await showConfirm('작성 내용이 변경되었습니다. 기존 결재 요청이 무효화됩니다. 새로 결재를 요청하시겠습니까?');
+      if (!proceed) return;
+    }
+
+    currentDraft.approval.state = APPROVAL_STATES.PENDING_REVIEW;
+    currentDraft.approval.subId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString() + Math.random().toString(36).slice(2);
+    currentDraft.approval.hash = newHash;
+    currentDraft.approval.approvals = [];
+
+    await saveDraft(currentDraft);
+    showToast('결재 요청이 접수되었습니다. (검토 대기)');
+    updateApprovalUI();
+  }
+
+  // ── 검토/승인 (결재자) ───────────────────────────────────────────────────────
+  async function reviewerSign(role, recordIdOrDraft) {
+    const ok = await showPinModalAndVerify();
+    if (!ok) { showToast('인증 실패'); return; }
+    const draft = typeof recordIdOrDraft === 'string' ? await dbGet(STORE_LOGS, recordIdOrDraft) : recordIdOrDraft;
+    if (!draft) { showToast('일지를 찾을 수 없습니다.'); return; }
+    if (draft.approval.state !== APPROVAL_STATES.PENDING_REVIEW && draft.approval.state !== APPROVAL_STATES.PENDING_APPROVE) {
+      showToast('현재 단계에서 결재를 진행할 수 없습니다.');
+      return;
+    }
+    const approvals = draft.approval.approvals || [];
+    const already = approvals.find(a => a.role === role);
+    if (already) { showToast('이미 ' + role + '되었습니다.'); return; }
+    const pinHash = await sha256($('#pinInput').value);
+    approvals.push({
+      role: role,
+      name: '결재자',
+      timestamp: new Date().toISOString(),
+      pinHash: pinHash,
+      subId: draft.approval.subId,
+      hash: draft.approval.hash
+    });
+    draft.approval.approvals = approvals;
+    if (role === '승인') {
+      draft.approval.state = APPROVAL_STATES.CONFIRMED;
+      draft.approval.hash = await sha256(JSON.stringify({ id: draft.id, approvals: approvals.map(a => ({role:a.role,name:a.name,timestamp:a.timestamp}))) );
+    } else if (role === '검토') {
+      draft.approval.state = APPROVAL_STATES.PENDING_APPROVE;
+    }
+    await dbPut(STORE_LOGS, draft);
+    showToast(role + ' 완료');
+    updateApprovalUI();
+    renderRecordList();
+  }
+
+  // ── 반려 (작성자 알림 포함) ─────────────────────────────────────────────────
+  async function rejectDraft(recordId, reason) {
+    if (!reason) { showToast('반려 사유를 입력하세요.'); return; }
+    const ok = await showPinModalAndVerify();
+    if (!ok) { showToast('인증 실패'); return; }
+    const draft = await dbGet(STORE_LOGS, recordId);
+    if (!draft) { showToast('일지를 찾을 수 없습니다.'); return; }
+    draft.approval.state = APPROVAL_STATES.REJECTED;
+    draft.approval.rejectReason = reason;
+    draft.approval.rejectBy = '결재자';
+    draft.approval.rejectTimestamp = new Date().toISOString();
+    draft.approval.hash = await sha256(JSON.stringify({ id: draft.id, rejectReason: reason }));
+    await dbPut(STORE_LOGS, draft);
+    showToast('반려되었습니다. 사유를 확인하세요.');
+    updateApprovalUI();
+    renderRecordList();
+  }
+
+  // ── 결재 취소 (작성자만 가능, 검토 전) ──────────────────────────────────────
+  async function cancelApprovalRequest(recordId) {
+    const draft = await dbGet(STORE_LOGS, recordId);
+    if (!draft) return;
+    if (draft.approval.state !== APPROVAL_STATES.PENDING_REVIEW && draft.approval.state !== APPROVAL_STATES.PENDING_APPROVE) {
+      showToast('결재 요청을 취소할 수 없는 상태입니다.');
+      return;
+    }
+    const proceed = await showConfirm('결재 요청을 취소하면 검토 대기 상태가 해제됩니다. 작성 중 상태로 되돌리겠습니까?');
+    if (!proceed) return;
+    draft.approval.state = APPROVAL_STATES.DRAFT;
+    draft.approval.approvals = [];
+    draft.approval.hash = '';
+    draft.approval.subId = '';
+    await dbPut(STORE_LOGS, draft);
+    showToast('결재 요청이 취소되었습니다.');
+    updateApprovalUI();
+    renderRecordList();
+  }
+
+  // ── 탭 전환 ──────────────────────────────────────────────────────────────────
+  function switchTo(tab) {
+    currentMode = tab;
+    $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    $$('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + tab));
+    if (tab === TABS.RECORD) {
+      renderRecordList();
+    }
+  }
+  $$('.tab').forEach(t => {
+    t.addEventListener('click', () => switchTo(t.dataset.tab));
+  });
+
+  // ── 기록 목록 렌더링 ─────────────────────────────────────────────────────────
+  function renderRecordList(filter = 'all') {
+    const container = $('#recordList');
+    container.innerHTML = '';
+    // 저장된 모든 로그 + 이미지 승인 로그 병합
+    (async function loadAndRender() {
+      const logs = await dbGetAll(STORE_LOGS);
+      const imgApp = await dbGetAll(STORE_IMG_APPROVALS);
+      // 결합
+      const combined = logs.map(l => ({
+        ...l,
+        type: 'normal',
+        approvalState: l.approval?.state,
+        imgData: null,
+        submitter: null
+      }));
+      imgApp.forEach(ia => {
+        combined.push({
+          ...ia.record,
+          type: 'received_image',
+          approvalState: ia.record.approval?.state,
+          imgData: ia.record.photos?.[0]?.dataURL || null,
+          submitter: ia.record.submitter
+        });
+      });
+      combined.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      const filtered = filter === 'all'
+        ? combined
+        : combined.filter(c => {
+            if (c.type === 'received_image') return filter === 'pending' ? c.approvalState === APPROVAL_STATES.PENDING_REVIEW : filter === 'rejected' && c.approvalState === APPROVAL_STATES.REJECTED;
+            const st = c.approval?.state;
+            if (filter === 'pending') return st === APPROVAL_STATES.PENDING_REVIEW || st === APPROVAL_STATES.PENDING_APPROVE;
+            if (filter === 'rejected') return st === APPROVAL_STATES.REJECTED;
+            return true;
+          });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:#888;font-size:12px;">해당 조건의 일지가 없습니다.</div>';
+        return;
+      }
+
+      filtered.forEach(rec => {
+        const card = el('div', { className: 'record-card' });
+        const header = el('div', { className: 'record-header' },
+          el('div', { className: 'record-date', text: rec.workDate + (rec.type === 'received_image' ? ' [이미지]' : '') }),
+          el('div', { className: 'record-badge' + (rec.approvalState === APPROVAL_STATES.PENDING_REVIEW ? ' badge-pending' : rec.approvalState === APPROVAL_STATES.CONFIRMED ? ' badge-approved' : rec.approvalState === APPROVAL_STATES.REJECTED ? ' badge-rejected' : ''), text: APPROVAL_LABELS[rec.approvalState] || '작성 중' })
+        );
+        card.appendChild(header);
+        const status = el('div', { className: 'record-status', text: `구분: ${rec.workType || rec.customType || '—'} | 사진: ${rec.photos?.length || 0}장 | 참석: ${rec.signers?.filter(s=>s.name).length || 0}명` });
+        card.appendChild(status);
+        const work = el('div', { className: 'record-work', text: (rec.workContent || '—').slice(0, 80) + (rec.workContent?.length > 80 ? '...' : '') });
+        card.appendChild(work);
+        const meta = el('div', { className: 'record-meta' });
+        if (rec.weatherChips) meta.appendChild(el('span', { text: '기상: ' + rec.weatherChips.join(', ') }));
+        meta.appendChild(el('span', { text: `시작: ${rec.startTime || '—'} 종료: ${rec.endTime || '—'}` }));
+        if (rec.submitter) meta.appendChild(el('span', { text: `제출자: ${rec.submitter?.submitter || '미상'}` }));
+        card.appendChild(meta);
+        // 확인필요 표시
+        if (rec.approval?.hash && rec.approval.subId) {
+          const badge = el('span', { className: 'confirm-needed', text: ' ⚠️ 확인 필요 (내용 변경됨)' });
+          header.appendChild(badge);
+        }
+        // 액션
+        const actions = el('div', { className: 'record-actions' });
+        const viewBtn = el('button', { type: 'button', text: '보기', onclick: () => { switchTo('write'); loadDraft(rec.id); } });
+        const printBtn = el('button', { type: 'button', text: '인쇄', onclick: () => { currentDraft = rec; doPrint(); } });
+        let rejectBtn, restoreBtn;
+        if (rec.approvalState === APPROVAL_STATES.REJECTED) {
+          rejectBtn = el('button', { type: 'button', text: '반려 사유 보기', onclick: () => showToast('반려 사유: ' + (rec.approval?.rejectReason || '없음')) });
+          actions.appendChild(rejectBtn);
+        }
+        if (rec.approvalState === APPROVAL_STATES.PENDING_REVIEW || rec.approvalState === APPROVAL_STATES.PENDING_APPROVE) {
+          const reviewBtn = el('button', { type: 'button', text: '검토', onclick: () => reviewerSign('검토', rec) });
+          const approveBtn = el('button', { type: 'button', text: rec.approvalState === APPROVAL_STATES.PENDING_REVIEW ? '승인' : '확정', onclick: () => reviewerSign('승인', rec) });
+          actions.appendChild(reviewBtn);
+          actions.appendChild(approveBtn);
+        }
+        if (rec.approvalState === APPROVAL_STATES.PENDING_REVIEW || rec.approvalState === APPROVAL_STATES.PENDING_APPROVE) {
+          const cancelBtn = el('button', { type: 'button', text: '요청 취소', onclick: () => cancelApprovalRequest(rec.id) });
+          actions.appendChild(cancelBtn);
+        }
+        card.appendChild(actions);
+        container.appendChild(card);
+      });
+    })();
+  }
+  $$('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderRecordList(btn.dataset.filter);
+    });
+  });
+
+  // ── 이벤트 연결 ──────────────────────────────────────────────────────────────
+  function bindEvents() {
+    // 날짜 변경 → 소요시간 자동 계산
+    $('#workDate').addEventListener('change', () => {
+      if (currentDraft) {
+        currentDraft.workDate = $('#workDate').value;
+        currentDraft.updatedAt = new Date().toISOString();
+      }
+    });
+    $('#startTime').addEventListener('change', () => {
+      const s = timeToMinutes($('#startTime').value);
+      const e = timeToMinutes($('#endTime').value);
+      if (e > s) {
+        currentDraft.duration = e - s;
+        $('#duration').value = currentDraft.duration;
+      }
+      if (currentDraft) currentDraft.updatedAt = new Date().toISOString();
+    });
+    $('#endTime').addEventListener('change', () => {
+      const s = timeToMinutes($('#startTime').value);
+      const e = timeToMinutes($('#endTime').value);
+      if (e > s) {
+        currentDraft.duration = e - s;
+        $('#duration').value = currentDraft.duration;
+      }
+      if (currentDraft) currentDraft.updatedAt = new Date().toISOString();
+    });
+    // 기본값 오늘
+    $('#workDate').value = fmtDate(today());
+
+    // 기상 칩
+    $$('#weatherChips .chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        chip.classList.toggle('selected');
+        currentDraft.weatherChips = $$('#weatherChips .chip.selected').map(c => c.dataset.val);
+      });
+    });
+
+    // 공종 칩
+    $$('#typeChips .chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        $$('#typeChips .chip').forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        currentDraft.workType = chip.dataset.val;
+        currentDraft.customType = '';
+        $('#customType').value = '';
+        renderRisks();
+        if (currentDraft) currentDraft.updatedAt = new Date().toISOString();
+      });
+    });
+
+    // 직접 입력 공종
+    $('#customType').addEventListener('change', () => {
+      currentDraft.customType = $('#customType').value;
+      if (currentDraft) currentDraft.updatedAt = new Date().toISOString();
+    });
+
+    // 사진 입력
+    $('#photoInput').addEventListener('change', (e) => {
+      handlePhotoSelect(e.target.files);
+      e.target.value = ''; // 재입력 가능하게
+    });
+
+    // 외국인 근로자 선택
+    $('#foreignWorker').addEventListener('change', () => {
+      $('#foreignCount').style.display = $('#foreignWorker').value === '있음' ? 'block' : 'none';
+      if (currentDraft) {
+        currentDraft.foreignWorker = $('#foreignWorker').value;
+        currentDraft.foreignCount = parseInt($('#foreignCount').value) || 0;
+        currentDraft.updatedAt = new Date().toISOString();
+      }
+    });
+
+    // 참석자 추가
+    $('#addSignerBtn').addEventListener('click', () => {
+      currentSigners.push({ id: nextSignerId++, name: '', signatureDataURL: null, signed: false });
+      renderSigners();
+      if (currentDraft) {
+        currentDraft.signers = currentSigners.map(s => ({ ...s }));
+        currentDraft.updatedAt = new Date().toISOString();
+      }
+    });
+
+    // 저장 (임시저장)
+    $('#saveDraftBtn').addEventListener('click', async () => {
+      // 폼 → currentDraft 동기화
+      if (currentDraft) {
+        currentDraft.workDate = $('#workDate').value;
+        currentDraft.projectName = $('#projectName').value || '산림재난대응단';
+        currentDraft.startTime = $('#startTime').value || '08:00';
+        currentDraft.endTime = $('#endTime').value || '17:00';
+        currentDraft.duration = parseInt($('#duration').value) || 0;
+        currentDraft.weatherMemo = $('#weatherMemo').value || '';
+        currentDraft.workContent = $('#workContent').value || '';
+        currentDraft.riskFactors = $('#riskFactors').value || '';
+        currentDraft.workerOpinion = $('#workerOpinion').value || '';
+        currentDraft.foreignWorker = $('#foreignWorker').value || '없음';
+        currentDraft.foreignCount = parseInt($('#foreignCount').value) || 0;
+        currentDraft.checkStopRight = $('#chkStopRight').checked;
+        currentDraft.checkHealth = $('#chkHealth').checked;
+        currentDraft.checkPPE = $('#chkPPE').checked;
+        currentDraft.checkRiskShare = $('#chkRiskShare').checked;
+        currentDraft.checkHeatCold = $('#chkHeatCold').checked;
+        currentDraft.specialNotes = $('#specialNotes').value || '';
+        currentDraft.signers = currentSigners.map(s => ({ id: s.id, name: s.name, signatureDataURL: s.signatureDataURL, signed: s.signed }));
+        currentDraft.assessments = assessments.map(a => ({ ...a }));
+        currentDraft.updatedAt = new Date().toISOString();
+        await saveDraft(currentDraft);
+      }
+    });
+
+    // 결재 요청
+    $('#requestApprovalBtn').addEventListener('click', async () => {
+      if (currentDraft) {
+        // 폼 동기화
+        currentDraft.workDate = $('#workDate').value;
+        currentDraft.projectName = $('#projectName').value || '산림재난대응단';
+        currentDraft.startTime = $('#startTime').value || '08:00';
+        currentDraft.endTime = $('#endTime').value || '17:00';
+        currentDraft.duration = parseInt($('#duration').value) || 0;
+        currentDraft.weatherMemo = $('#weatherMemo').value || '';
+        currentDraft.workContent = $('#workContent').value || '';
+        currentDraft.riskFactors = $('#riskFactors').value || '';
+        currentDraft.workerOpinion = $('#workerOpinion').value || '';
+        currentDraft.foreignWorker = $('#foreignWorker').value || '없음';
+        currentDraft.foreignCount = parseInt($('#foreignCount').value) || 0;
+        currentDraft.checkStopRight = $('#chkStopRight').checked;
+        currentDraft.checkHealth = $('#chkHealth').checked;
+        currentDraft.checkPPE = $('#chkPPE').checked;
+        currentDraft.checkRiskShare = $('#chkRiskShare').checked;
+        currentDraft.checkHeatCold = $('#chkHeatCold').checked;
+        currentDraft.specialNotes = $('#specialNotes').value || '';
+        currentDraft.signers = currentSigners.map(s => ({ id: s.id, name: s.name, signatureDataURL: s.signatureDataURL, signed: s.signed }));
+        currentDraft.assessments = assessments.map(a => ({ ...a }));
+        currentDraft.updatedAt = new Date().toISOString();
+        await requestApproval();
+      }
+    });
+
+    // 새 일지
+    $('#newEntryBtn').addEventListener('click', newEntry);
+
+    // 인쇄
+    $('#printBtn').addEventListener('click', () => {
+      if (!currentDraft) { showToast('작성된 일지가 없습니다.'); return; }
+      doPrint();
+    });
+
+    // 입력 변경 → 승인 무효화 경고
+    const formInputs = '#workDate,#projectName,#startTime,#endTime,#workContent,#riskFactors,#workerOpinion,#specialNotes';
+    $$(formInputs).forEach(inp => {
+      inp.addEventListener('input', () => {
+        if (currentDraft && (currentDraft.approval?.state === APPROVAL_STATES.PENDING_REVIEW || currentDraft.approval?.state === APPROVAL_STATES.PENDING_APPROVE)) {
+          const missing = checkApprovalRequirements();
+          if (missing.length > 0) {
+            $('#approvalMissingInfo').innerHTML = '<strong>결재 요청 불가 — 다음 항목 누락:</strong><br>' + missing.map(m => '• ' + m).join('<br>');
+          }
+        }
+      });
+    });
+
+    // 위험요인 수집 (체크박스)
+    document.getElementById('riskContainer').addEventListener('change', (e) => {
+      if (e.target.type === 'checkbox') {
+        if (!currentDraft) currentDraft = createEmptyDraft();
+        if (!currentDraft.risks) currentDraft.risks = { common: [], specific: [], custom: [] };
+        // 공통
+        const checked = $$('#riskContainer input[type="checkbox"]:checked');
+        currentDraft.risks.common = Array.from(checked).filter(cb => COMMON_RISKS.includes(cb.label.textContent)).map(cb => cb.label.textContent);
+      }
+    });
+
+    // 작업내용 / 위험요인 변경 감지
+    $('#workContent').addEventListener('input', () => { if (currentDraft) { currentDraft.workContent = $('#workContent').value; currentDraft.updatedAt = new Date().toISOString(); } });
+    $('#riskFactors').addEventListener('input', () => { if (currentDraft) { currentDraft.riskFactors = $('#riskFactors').value; currentDraft.updatedAt = new Date().toISOString(); } });
+    $('#workerOpinion').addEventListener('input', () => { if (currentDraft) { currentDraft.workerOpinion = $('#workerOpinion').value; currentDraft.updatedAt = new Date().toISOString(); } });
+    $('#specialNotes').addEventListener('input', () => { if (currentDraft) { currentDraft.specialNotes = $('#specialNotes').value; currentDraft.updatedAt = new Date().toISOString(); } });
+  }
+
+  // ── 초기화 ──────────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', async () => {
+    bindEvents();
+    await loadDraft(null);
+    renderRecordList();
+    // 안전 영역 대응
+    document.body.style.paddingBottom = 'env(safe-area-inset-bottom, 0px)';
+  });
+})();
+// ========================================
+// 3부: 추가 기능 및 최종 검증
+// ========================================
+(function() {
+  'use strict';
+
+  // ── 검색 기능 ────────────────────────────────────────────────────────────────
+  let searchTimeout = null;
+  function setupSearch() {
+    const searchBox = document.createElement('div');
+    searchBox.style.cssText = 'padding:10px 12px; background:#fff; border-bottom:1px solid #d5d9d2;';
+    searchBox.innerHTML = `
+      <input type="text" id="recordSearch" placeholder="검색 (작업내용, 사업명, 참석자 이름 등)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; font-size:12px;">
+    `;
+    const recordPage = $('#page-record');
+    recordPage.insertBefore(searchBox, recordPage.firstChild);
+    
+    $('#recordSearch').addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        renderRecordList($$('.filter-btn.active')[0]?.dataset.filter || 'all');
+      }, 200);
+    });
+  }
+
+  // ── 미리보기 (인쇄 전 확인) ─────────────────────────────────────────────────
+  function showPrintPreview() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;';
+    
+    const content = document.createElement('div');
+    content.className = 'modal';
+    content.style.cssText = 'max-width:500px; max-height:90vh; overflow:auto;';
+    content.innerHTML = `
+      <div class="modal-header">인쇄 미리보기</div>
+      <div class="modal-body" id="previewContent" style="font-size:12px; line-height:1.6;">
+        <p>현재 일지를 A4 용지에 맞춰 인쇄합니다.</p>
+        <div id="previewWarning" style="background:#fff3cd;padding:8px;border-radius:4px;margin:10px 0;font-size:11px;"></div>
+        <div id="previewSummary" style="margin:10px 0;"></div>
+        <p style="font-size:11px;color:#666;">✓ 확인 후 "인쇄" 버튼을 누르면 실제 프린터로 출력됩니다.</p>
+        <p style="font-size:11px;color:#666;">✓ "취소"를 누르면 모달만 닫힙니다.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" style="background:#fff;color:#333;border:1px solid #999;" id="previewCancelBtn">취소</button>
+        <button class="btn" style="background:#d9480f;color:#fff;" id="previewConfirmBtn">인쇄</button>
+      </div>
+    `;
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    
+    // 미리보기 요약 생성
+    const d = currentDraft;
+    const isConfirmed = d?.approval?.state === 3;
+    const previewSummary = $('#previewSummary');
+    previewSummary.innerHTML = `
+      <strong>${d?.workDate} ${d?.startTime || ''}~${d?.endTime || ''}</strong><br>
+      사업: ${d?.projectName || '—'} | 구분: ${d?.workType || d?.customType || '—'}<br>
+      사진: ${d?.photos?.length || 0}장 | 참석자: ${d?.signers?.filter(s=>s.name).length || 0}명<br>
+      <span style="color:${isConfirmed ? '#1e7e34' : '#b02a37'}">${isConfirmed ? '결재 완료' : '미확정'}</span>
+    `;
+    
+    $('#previewWarning').textContent = isConfirmed 
+      ? '결재가 완료된 확정 문서입니다.' 
+      : '⚠️ 미확정 문서입니다. 결재 전 인쇄하시길 권장합니다.';
+
+    const hideModal = () => {
+      document.body.removeChild(modal);
+    };
+
+    $('#previewCancelBtn').onclick = hideModal;
+    modal.onclick = (e) => { if (e.target === modal) hideModal(); };
+
+    $('#previewConfirmBtn').onclick = () => {
+      hideModal();
+      doPrint();
+    };
+  }
+
+  // ── 자동 저장 (5분마다) ─────────────────────────────────────────────────────
+  let autoSaveTimer = null;
+  function setupAutoSave() {
+    autoSaveTimer = setInterval(async () => {
+      if (currentDraft && currentMode === TABS.WRITE) {
+        // 변경 감지 (간단한 해시 검사)
+        const keyFields = [
+          currentDraft.workContent,
+          currentDraft.riskFactors,
+          currentDraft.workerOpinion,
+          currentDraft.specialNotes,
+          currentDraft.weatherMemo
+        ].join('|');
+        
+        try {
+          await saveDraft(currentDraft);
+          // 성공 시 조용히 넘어감 (사용자가 눈치채지 못하도록)
+        } catch (e) {
+          console.warn('Auto-save failed:', e);
+        }
+      }
+    }, 300000); // 5분
+  }
+
+  // ── 키보드 단축키 ───────────────────────────────────────────────────────────
+  function setupKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+      // Ctrl + S: 저장 (prevent default)
+      if (e.ctrlKey && e.key === 's' && currentMode === TABS.WRITE) {
+        e.preventDefault();
+        $('#saveDraftBtn').click();
+        showToast('임시 저장됨');
+      }
+      // Ctrl + P: 인쇄 미리보기
+      if (e.ctrlKey && e.key === 'p' && currentMode === TABS.WRITE) {
+        e.preventDefault();
+        showPrintPreview();
+      }
+      // Ctrl + N: 새 일지 (확인 후)
+      if (e.ctrlKey && e.key === 'n' && currentMode === TABS.WRITE) {
+        e.preventDefault();
+        newEntry();
+      }
+      // Escape: 모달 닫기
+      if (e.key === 'Escape') {
+        $('#confirmModal').classList.remove('active');
+        $('#pinModal').classList.remove('active');
+        $('#sigModal').classList.remove('active');
+      }
+    });
+  }
+
+  // ── 모바일 키보드 자동 스크롤 방지 ─────────────────────────────────────────
+  function preventZoomOnDoubleTap() {
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (e) {
+      const now = (new Date()).getTime();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+        return false;
+      }
+      lastTouchEnd = now;
+    }, { passive: false });
+  }
+
+  // ── 스크롤 동기화 (키보드 열 때 입력 영역 스크롤) ──────────────────────────
+  function setupScrollSync() {
+    const inputs = 'input, textarea, select';
+    $$(inputs).forEach(inp => {
+      inp.addEventListener('focus', function() {
+        // iOS Safari에서 키보드 열 때 자동 스크롤 방지
+        this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+  }
+
+  // ── 용지 방향 감지 (인쇄 시) ───────────────────────────────────────────────
+  function detectPrintOrientation() {
+    // A4 세로 기준 너비 210mm, 높이 297mm
+    // 모바일 화면 기준으로 판단
+    const screenWidth = window.screen.width || window.innerWidth;
+    return screenWidth > screen.height ? 'landscape' : 'portrait';
+  }
+
+  // ── URL 파라미터 처리 (직접 일지 열기) ──────────────────────────────────────
+  function handleUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const logId = urlParams.get('id');
+    if (logId) {
+      // URL에 id가 있으면 해당 일지로 바로 이동
+      switchTo(TABS.WRITE);
+      loadDraft(logId).then(() => {
+        showToast('URL에서 일지를 불러왔습니다.');
+      });
+      // URL 정리 (history replace)
+      if (history.replaceState) {
+        const newUrl = window.location.pathname;
+        history.replaceState(null, '', newUrl);
+      }
+    }
+  }
+
+  // ── 네트워크 상태 감지 (오프라인 안내) ─────────────────────────────────────
+  function setupOfflineDetection() {
+    window.addEventListener('online', () => {
+      showToast('네트워크가 복구되었습니다. 동기화 준비합니다.');
+      // IndexedDB → 서버 동기화 로직 (폐쇄망 환경에서는 스킵)
+    });
+    
+    window.addEventListener('offline', () => {
+      showToast('오프라인 상태입니다. 로컬에 저장됩니다.');
+    });
+  }
+
+  // ── 클립보드 복사 기능 ─────────────────────────────────────────────────────
+  async function copyToClipboard(text, label = '복사됨') {
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast(label);
+    } catch {
+      // fallback
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast(label);
+      } catch {
+        showToast('복사 실패');
+      }
+      document.body.removeChild(ta);
+    }
+  }
+
+  // ── 기록 목록 개선 (더보기, 정렬) ──────────────────────────────────────────
+  function enhanceRecordList() {
+    // 이미 renderRecordList에 포함되어 있지만
+    // 추가 정렬 옵션 등을 위한 확장
+    
+    // CSV 내보내기 추가
+    const exportCsvBtn = document.createElement('button');
+    exportCsvBtn.type = 'button';
+    exportCsvBtn.className = 'btn';
+    exportCsvBtn.style.cssText = 'font-size:11px;padding:4px 8px;';
+    exportCsvBtn.textContent = 'CSV';
+    exportCsvBtn.onclick = async () => {
+      const logs = await dbGetAll(STORE_LOGS);
+      if (logs.length === 0) {
+        showToast('내보낼 데이터가 없습니다.');
+        return;
+      }
+      
+      const headers = ['id', 'workDate', 'projectName', 'workType', 'workContent', 'riskFactors', 'workerOpinion', 'state', 'photoCount', 'signerCount'];
+      const csvContent = [
+        headers.join(','),
+        ...logs.map(l => headers.map(h => {
+          let val = l[h];
+          if (typeof val === 'object') val = JSON.stringify(val).replace(/"/g, '""');
+          if (val === null || val === undefined) val = '';
+          return `"${String(val).replace(/"/g, '""')}"`;
+        }).join(','))
+      ].join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tbm_records_${fmtDate(new Date())}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('CSV 파일이 생성되었습니다.');
+    };
+    
+    // 필터 행에 버튼 추가
+    const filterRow = document.querySelector('.filter-row');
+    if (filterRow) {
+      filterRow.appendChild(exportCsvBtn);
+    }
+  }
+
+  // ── 에러 핸들링 전역 설정 ───────────────────────────────────────────────────
+  window.addEventListener('error', (e) => {
+    console.error('Global error:', e.error);
+    // 사용자에게는 조용히 처리하거나 간단한 알림만
+    // showToast('예기치 않은 오류가 발생했습니다. 콘솔을 확인하세요.');
+  });
+
+  // ── 페이지 언로드 시 확인 ──────────────────────────────────────────────────
+  window.addEventListener('beforeunload', (e) => {
+    if (currentDraft && currentMode === TABS.WRITE) {
+      const hasChanges = currentDraft.workContent?.trim() ||
+                        currentDraft.riskFactors?.trim() ||
+                        currentDraft.workerOpinion?.trim() ||
+                        currentSigners.some(s => s.signed);
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = '저장하지 않은 내용이 있습니다. 정말 나가시겠습니까?';
+        return e.returnValue;
+      }
+    }
+  });
+
+  // ── 접근성 개선 (ARIA 레이블 등) ───────────────────────────────────────────
+  function setupAccessibility() {
+    // 탭에 ARIA 속성 추가
+    $$('.tab').forEach((tab, idx) => {
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-selected', idx === 0 ? 'true' : 'false');
+      tab.setAttribute('tabindex', '0');
+      tab.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          tab.click();
+        }
+      });
+    });
+    
+    // 버튼에 aria-label 추가
+    const iconButtons = $$('button[title], button[aria-label]');
+    // 이미 title이나 aria-label이 있으면 건너뜀
+  }
+
+  // ── 디바이스 최적화 ─────────────────────────────────────────────────────────
+  function optimizeForDevice() {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      document.body.classList.add('mobile-device');
+      // 터치 반응 속도 개선
+      document.documentElement.style.setProperty('--touch-action', 'manipulation');
+    }
+  }
+
+  // ── 최종 초기화 ─────────────────────────────────────────────────────────────
+  const originalInit = document.addEventListener;
+  originalInit('DOMContentLoaded', async () => {
+    // 기존 초기화
+    bindEvents();
+    await loadDraft(null);
+    renderRecordList();
+    
+    // 추가 기능들
+    setupSearch();
+    setupAutoSave();
+    setupKeyboardShortcuts();
+    preventZoomOnDoubleTap();
+    setupScrollSync();
+    handleUrlParams();
+    setupOfflineDetection();
+    enhanceRecordList();
+    setupAccessibility();
+    optimizeForDevice();
+    
+    // 최초 실행 안내
+    const isFirstRun = !lsLoad('has_run');
+    if (isFirstRun) {
+      // 3초 후 안내
+      setTimeout(() => {
+        showToast('처음 사용자이신가요? 우측 하단 버튼을 확인하세요.');
+        lsSave('has_run', true);
+      }, 3000);
+    }
+    
+    // Pin 미설정 시 안내
+    const pinSet = lsLoad('pin_set');
+    if (!pinSet) {
+      setTimeout(() => {
+        showToast('최초 사용 시 PIN 인증이 필요합니다. 결재 시 PIN을 설정하세요.');
+      }, 1000);
+    }
+  });
+
+  // ── 확장: 이미지 일지 결재 보기 모달 ───────────────────────────────────────
+  async function showImageApprovalModal(recordId) {
+    const record = await dbGet(STORE_LOGS, recordId);
+    if (!record || record.type !== 'received_image') {
+      showToast('올바른 이미지 일지가 아닙니다.');
+      return;
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:400;display:flex;align-items:center;justify-content:center;padding:10px;';
+    
+    const content = document.createElement('div');
+    content.className = 'modal';
+    content.style.cssText = 'max-width:95vw; max-height:95vh; padding:0; overflow:hidden;';
+    
+    const isConfirmed = record.approval?.state === 3;
+    
+    content.innerHTML = `
+      <div class="modal-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>이미지 일지 결재</div>
+        <button style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;">✕</button>
+      </div>
+      <div style="padding:15px; max-height:60vh; overflow-y:auto;">
+        <div style="text-align:center; margin-bottom:10px;">
+          <strong>제출자:</strong> ${record.submitter?.submitter || '미상'}<br>
+          <strong>일자:</strong> ${record.workDate}<br>
+          <strong>상태:</strong> 
+          <span style="color:${record.approval?.state === 3 ? '#1e7e34' : record.approval?.state === 2 ? '#e67e22' : '#b02a37'}">
+            ${APPROVAL_LABELS[record.approval?.state || 0]}
+          </span>
+          ${record.approval?.hash ? `<br><small style="color:#888;">Hash: ${record.approval.hash.slice(0, 8)}...</small>` : ''}
+        </div>
+        <div style="text-align:center; margin-bottom:15px;">
+          <img src="${record.photos[0]?.dataURL}" style="max-width:100%; max-height:40vh; border:1px solid #ddd; border-radius:4px;">
+          <p style="font-size:11px; color:#666; margin-top:5px;">${record.photos[0]?.desc || '이미지 내용'}</p>
+        </div>
+        ${record.approval?.approvals?.length ? `
+          <div style="background:#f8f9fa; padding:10px; border-radius:4px; font-size:11px;">
+            <strong style="display:block; margin-bottom:5px;">결재 이력:</strong>
+            ${record.approval.approvals.map(a => `
+              <div style="margin:3px 0;">
+                <span style="display:inline-block; width:12px; height:12px; background:${a.role === '검토' ? '#e67e22' : '#27ae60'}; border-radius:50%; vertical-align:middle; margin-right:5px;"></span>
+                ${a.role}: ${a.name} (${new Date(a.timestamp).toLocaleString('ko-KR')})
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+        ${record.approval?.rejectReason ? `
+          <div style="background:#fdecea; padding:8px; border-radius:4px; margin-top:10px; font-size:11px; color:#b02a37;">
+            <strong>반려 사유:</strong> ${record.approval.rejectReason}
+          </div>
+        ` : ''}
+      </div>
+      <div class="modal-footer" style="justify-content:space-between;">
+        <button class="btn" style="flex:1; margin-right:8px;" id="approveBtn" ${record.approval?.state >= 2 ? 'disabled' : ''}>검토</button>
+        <button class="btn" style="flex:1; margin-right:8px;" id="confirmBtn" ${record.approval?.state >= 3 ? 'disabled' : ''}>승인</button>
+        <button class="btn" style="flex:1;" id="closeModalBtn">닫기</button>
+      </div>
+    `;
+    
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    
+    // 버튼 이벤트
+    const closeModal = () => document.body.removeChild(modal);
+    content.querySelector('button:last-child').onclick = closeModal;
+    modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+    
+    const approveBtn = document.getElementById('approveBtn');
+    const confirmBtn = document.getElementById('confirmBtn');
+    
+    if (record.approval?.state === 1) { // PENDING_REVIEW
+      approveBtn.style.display = 'inline-block';
+      confirmBtn.style.display = 'none';
+      approveBtn.onclick = async () => {
+        await reviewerSign('검토', record);
+        closeModal();
+      };
+    } else if (record.approval?.state === 2) { // PENDING_APPROVE
+      approveBtn.style.display = 'none';
+      confirmBtn.style.display = 'inline-block';
+      confirmBtn.onclick = async () => {
+        await reviewerSign('승인', record);
+        closeModal();
+      };
+    } else if (isConfirmed) {
+      approveBtn.style.display = 'none';
+      confirmBtn.style.display = 'none';
+    }
+  }
+
+  // ── 사진 설명 편집 기능 ─────────────────────────────────────────────────────
+  function setupPhotoDescEdit() {
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('desc')) {
+        const item = e.target.closest('.photo-item');
+        const idx = Array.from($('#photoGrid').children).indexOf(item);
+        if (idx === -1) return;
+        
+        const photo = currentDraft.photos[idx];
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = photo.desc || '';
+        input.placeholder = '설명 입력...';
+        input.style.cssText = 'position:absolute; bottom:0; left:0; right:0; width:100%; border:none; padding:2px; font-size:9px; background:rgba(0,0,0,0.7); color:#fff; box-sizing:border-box;';
+        
+        input.addEventListener('blur', () => {
+          photo.desc = input.value;
+          currentDraft.updatedAt = new Date().toISOString();
+          saveDraft(currentDraft);
+        });
+        input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') input.blur();
+        });
+        
+        item.appendChild(input);
+        input.focus();
+        input.select();
+      }
+    });
+  }
+
+  // 기존 초기화 함수에 추가
+  const originalInit2 = document.addEventListener;
+  originalInit2('DOMContentLoaded', () => {
+    setTimeout(setupPhotoDescEdit, 500);
+  });
+
+  // ── utils 노출 (디버깅용) ──────────────────────────────────────────────────
+  window.TBMTools = {
+    saveDraft: () => saveDraft(currentDraft),
+    exportJSON: exportAll,
+    clearAll: async () => {
+      const confirmResult = await showConfirm('모든 데이터를 삭제합니다. 정말로 진행하시겠습니까?');
+      if (confirmResult) {
+        await clearAllDB();
+        lsClear();
+        showToast('모든 데이터가 삭제되었습니다.');
+        loadDraft(null);
+      }
+    },
+    importJSON: (file) => importFrom(file),
+    getCurrentDraft: () => currentDraft,
+    getApprovalState: () => currentDraft?.approval?.state ?? -1,
+    refreshRecords: () => renderRecordList(),
+  };
+
+  function lsClear() {
+    try { localStorage.clear(); } catch {}
+  }
+
+})();
+</script>
+</body>
+</html>
